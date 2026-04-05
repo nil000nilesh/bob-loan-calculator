@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BOB Loan Calculator</title>
+<style>
+:root{
+  --or:#E8521A;--dk:#1A1A2E;--nv:#16213E;
+  --gr:#1D9E75;--grl:#E1F5EE;
+  --am:#BA7517;--aml:#FAEEDA;
+  --rd:#A32D2D;--rdl:#FCEBEB;
+  --bl:#185FA5;--bll:#E6F1FB;
+  --bd:#E5E7EB;--bg:#F4F6FA;--wh:#fff;
+  --tx:#111827;--mu:#6B7280;
+  --ra:12px;--sh:0 2px 8px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;}
+
+/* HEADER */
+.hdr{background:var(--dk);padding:11px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;border-bottom:3px solid var(--or);}
+.hdr-logo{width:32px;height:32px;background:var(--or);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;}
+.hdr-t{color:#fff;font-size:13.5px;font-weight:700;}
+.hdr-s{color:rgba(255,255,255,.4);font-size:10px;}
+.hdr-rates{margin-left:auto;display:flex;gap:6px;}
+.rp{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:3px 7px;text-align:center;}
+.rp-l{font-size:8px;color:rgba(255,255,255,.4);letter-spacing:.5px;display:block;}
+.rp-v{font-size:11.5px;font-weight:800;color:var(--or);}
+
+/* PROGRESS */
+.pgw{background:#fff;padding:10px 16px 8px;border-bottom:1px solid var(--bd);}
+.pgb{height:4px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-bottom:5px;}
+.pgf{height:100%;background:linear-gradient(90deg,var(--or),#f97316);border-radius:4px;transition:width .4s;}
+.pgi{display:flex;justify-content:space-between;align-items:center;}
+.pgl{font-size:12px;font-weight:700;color:var(--or);}
+.pgc{font-size:10px;color:var(--mu);}
+
+/* PHASE BADGE */
+.phase-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;}
+.phase-person{background:#EEEDFE;color:#3C3489;}
+.phase-product{background:var(--aml);color:#633806;}
+.phase-calc{background:var(--grl);color:#085041;}
+.phase-result{background:var(--bll);color:var(--bl);}
+
+/* CONTENT */
+.cnt{padding:14px 16px;max-width:520px;margin:0 auto;padding-bottom:95px;}
+
+/* STEP HEADER */
+.sh{margin-bottom:14px;}
+.sh-title{font-size:18px;font-weight:800;color:var(--tx);}
+.sh-desc{font-size:12px;color:var(--mu);margin-top:3px;line-height:1.5;}
+
+/* CARD */
+.card{background:#fff;border:1px solid var(--bd);border-radius:var(--ra);padding:15px;margin-bottom:11px;box-shadow:var(--sh);}
+.ct{font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.8px;margin-bottom:11px;padding-bottom:8px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:5px;}
+.ct .dot{width:7px;height:7px;border-radius:50%;background:var(--or);flex-shrink:0;}
+
+/* APPLICANT TYPE CARDS */
+.app-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.app-btn{border:2px solid var(--bd);border-radius:11px;padding:14px 10px;cursor:pointer;background:#fff;text-align:center;transition:all .2s;width:100%;}
+.app-btn:hover{border-color:var(--or);background:#FFF8F5;}
+.app-btn.active{border-color:var(--or);background:linear-gradient(135deg,#FFF8F5,#FFF3EE);box-shadow:0 0 0 1px var(--or);}
+.app-icon{font-size:28px;margin-bottom:6px;display:block;}
+.app-name{font-size:13px;font-weight:700;color:var(--tx);}
+.app-sub{font-size:10px;color:var(--mu);margin-top:2px;line-height:1.4;}
+
+/* MONTH SALARY CARDS */
+.month-card{background:var(--bg);border:1.5px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:8px;transition:border-color .2s;}
+.month-card.filled{border-color:var(--gr);}
+.month-name{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.month-badge{font-size:9px;padding:2px 7px;border-radius:10px;font-weight:700;}
+.mb-cur{background:var(--or);color:#fff;}
+.mb-prev{background:#E5E7EB;color:var(--mu);}
+.salary-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.mini-field{margin-bottom:0;}
+.mini-label{font-size:10.5px;color:var(--mu);margin-bottom:4px;font-weight:500;}
+.calc-net{margin-top:8px;padding:7px 10px;background:var(--grl);border-radius:7px;display:flex;justify-content:space-between;align-items:center;}
+.net-label{font-size:11px;color:#085041;}
+.net-val{font-size:13px;font-weight:800;color:#085041;}
+
+/* FORM */
+.field{margin-bottom:13px;}
+.fl{font-size:12px;font-weight:500;color:var(--mu);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;}
+.fb{font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--bll);color:var(--bl);}
+.iw{position:relative;}
+.pfx{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--mu);font-weight:500;pointer-events:none;}
+input[type=number],select,input[type=text]{
+  width:100%;height:42px;border:1.5px solid var(--bd);border-radius:9px;
+  font-size:14px;color:var(--tx);background:#fff;font-family:inherit;transition:border-color .15s;
+}
+input[type=number],input[type=text]{padding:0 10px 0 26px;}
+input.no-pfx{padding:0 10px;}
+select{padding:0 10px;cursor:pointer;}
+input:focus,select:focus{outline:none;border-color:var(--or);}
+input::-webkit-inner-spin-button{opacity:1;}
+
+/* TOGGLE */
+.tg{display:flex;gap:6px;}
+.tb{flex:1;padding:10px 6px;border:1.5px solid var(--bd);border-radius:9px;font-size:12.5px;cursor:pointer;background:#fff;text-align:center;transition:all .15s;font-family:inherit;font-weight:600;}
+.tb.active{border-color:var(--or);background:#FFF8F5;color:var(--or);}
+
+/* CIBIL */
+.cibil-box{text-align:center;padding:14px;background:var(--bg);border-radius:10px;border:1.5px solid var(--bd);margin-bottom:10px;}
+.cn{font-size:42px;font-weight:900;letter-spacing:-1px;}
+.cl{font-size:11px;color:var(--mu);margin-top:2px;}
+input[type=range]{width:100%;-webkit-appearance:none;height:5px;background:linear-gradient(to right,#E24B4A 0%,#E24B4A 15%,#BA7517 15%,#BA7517 50%,#1D9E75 50%,#1D9E75 100%);border-radius:4px;cursor:pointer;margin:6px 0;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--or);box-shadow:0 2px 6px rgba(0,0,0,.2);cursor:pointer;}
+
+/* PRODUCT SELECT */
+.prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.prod-btn{border:1.5px solid var(--bd);border-radius:11px;padding:12px 10px;cursor:pointer;background:#fff;text-align:left;transition:all .15s;width:100%;position:relative;}
+.prod-btn:hover{border-color:var(--or);}
+.prod-btn.active{border-color:var(--or);background:#FFF8F5;box-shadow:0 0 0 1px var(--or);}
+.prod-btn.coming{opacity:.5;cursor:not-allowed;}
+.pb-name{font-size:12px;font-weight:700;color:var(--tx);line-height:1.3;}
+.pb-code{font-size:10px;color:var(--mu);margin-top:2px;}
+.pb-tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:4px;margin-top:4px;font-weight:600;}
+.tag-std{background:#F1EFE8;color:#5F5E5A;}
+.tag-def{background:var(--bll);color:var(--bl);}
+.tag-new{background:var(--grl);color:#085041;}
+.tag-ev{background:#EAF3DE;color:#27500A;}
+.tag-used{background:var(--aml);color:#633806;}
+.tag-soon{background:#E5E7EB;color:var(--mu);}
+
+/* CAR PRODUCT SELECT */
+.car-grid{display:grid;grid-template-columns:1fr;gap:6px;}
+.car-btn{border:1.5px solid var(--bd);border-radius:10px;padding:10px 12px;cursor:pointer;background:#fff;text-align:left;transition:all .15s;width:100%;display:flex;align-items:center;gap:10px;}
+.car-btn:hover{border-color:var(--or);}
+.car-btn.active{border-color:var(--or);background:#FFF8F5;box-shadow:0 0 0 1px var(--or);}
+.car-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--bd);flex-shrink:0;transition:all .15s;}
+.car-btn.active .car-dot{border-color:var(--or);background:var(--or);}
+.car-info{flex:1;}
+.car-name{font-size:13px;font-weight:700;color:var(--tx);}
+.car-desc{font-size:10.5px;color:var(--mu);margin-top:2px;}
+
+/* INFO BOXES */
+.info{padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.6;margin-bottom:10px;}
+.info-or{border-left:3px solid var(--or);background:var(--bg);}
+.info-bl{border-left:3px solid var(--bl);background:var(--bll);color:#0C447C;}
+.info-gr{border-left:3px solid var(--gr);background:var(--grl);color:#085041;}
+.info-am{border-left:3px solid var(--am);background:var(--aml);color:#633806;}
+.info strong{color:var(--tx);}
+
+/* RESULTS */
+.res-hero{background:linear-gradient(135deg,var(--dk),var(--nv));border-radius:var(--ra);padding:16px;color:#fff;margin-bottom:11px;}
+.rh-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.rh-label{font-size:9px;color:rgba(255,255,255,.5);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px;}
+.rh-val{font-size:24px;font-weight:900;color:var(--or);letter-spacing:-.5px;}
+.rh-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;}
+.rh-div{height:1px;background:rgba(255,255,255,.1);margin:10px 0;}
+.rh-row{display:flex;justify-content:space-between;padding:4px 0;font-size:11.5px;}
+.rh-rl{color:rgba(255,255,255,.5);}
+.rh-rv{color:#fff;font-weight:600;}
+
+.eg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px;}
+.ec{border-radius:var(--ra);padding:13px;border:1.5px solid var(--bd);}
+.ec.ok{border-color:var(--gr);background:var(--grl);}
+.ec.bad{border-color:var(--rd);background:var(--rdl);}
+.ec.warn{border-color:var(--am);background:var(--aml);}
+.ec-t{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.ec.ok .ec-t{color:var(--gr);}
+.ec.bad .ec-t{color:var(--rd);}
+.ec.warn .ec-t{color:var(--am);}
+.ec-v{font-size:19px;font-weight:900;color:var(--tx);}
+.ec.ok .ec-v{color:#085041;}
+.ec.bad .ec-v{color:var(--rd);}
+.ec-s{font-size:10px;color:var(--mu);margin-top:3px;line-height:1.4;}
+
+.vd{border-radius:var(--ra);padding:13px;text-align:center;font-size:14px;font-weight:700;margin-bottom:11px;}
+.vd.pass{background:var(--grl);color:#085041;border:2px solid var(--gr);}
+.vd.fail{background:var(--rdl);color:var(--rd);border:2px solid var(--rd);}
+.vd.warn{background:var(--aml);color:#633806;border:2px solid var(--am);}
+
+/* BK TABLE */
+.bk{border:1px solid var(--bd);border-radius:var(--ra);overflow:hidden;margin-bottom:10px;}
+.bk-h{background:var(--dk);padding:7px 13px;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px;}
+.bk-r{display:flex;justify-content:space-between;align-items:center;padding:8px 13px;border-bottom:1px solid var(--bd);font-size:12.5px;}
+.bk-r:last-child{border:none;}
+.bk-r:nth-child(even){background:var(--bg);}
+.bk-l{color:var(--mu);}
+.bk-v{font-weight:700;font-size:13px;}
+.bk-v.g{color:#085041;}
+.bk-v.r{color:var(--rd);}
+.bk-v.o{color:var(--or);}
+
+/* EMI BARS */
+.ebr{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.ebl{font-size:11px;color:var(--mu);min-width:80px;}
+.ebo{flex:1;background:var(--bg);border-radius:4px;height:24px;overflow:hidden;}
+.ebi{height:100%;display:flex;align-items:center;padding-left:8px;border-radius:4px;transition:width .5s;}
+.ebt{font-size:11px;font-weight:700;color:#fff;}
+
+/* AMORT */
+.amort-wrap{overflow-x:auto;border:1px solid var(--bd);border-radius:var(--ra);}
+.at{width:100%;border-collapse:collapse;font-size:11px;min-width:350px;}
+.at th{background:var(--dk);color:rgba(255,255,255,.7);padding:7px 9px;text-align:right;font-weight:600;position:sticky;top:0;}
+.at th:first-child{text-align:left;}
+.at td{padding:5px 9px;text-align:right;border-bottom:1px solid var(--bd);}
+.at td:first-child{text-align:left;font-weight:600;}
+.at tr:nth-child(even) td{background:var(--bg);}
+.at tfoot td{font-weight:800;background:var(--dk);color:#fff;border:none;}
+
+/* SHARE */
+.share-grid{display:flex;flex-direction:column;gap:8px;}
+.sbtn{width:100%;padding:14px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;}
+.s-pdf{background:var(--dk);color:#fff;}
+.s-wa{background:#25D366;color:#fff;}
+
+/* SUMMARY HERO */
+.sum-h{background:linear-gradient(135deg,#1a1a2e,#0f3460);border-radius:var(--ra);padding:16px;color:#fff;text-align:center;margin-bottom:11px;}
+.sh-amt{font-size:34px;font-weight:900;color:var(--or);letter-spacing:-1px;}
+.sh-lbl{font-size:10px;color:rgba(255,255,255,.5);margin-bottom:3px;}
+.sh-emi{font-size:17px;font-weight:700;color:#fff;margin-top:5px;}
+.sh-sub{font-size:10px;color:rgba(255,255,255,.4);}
+.tag-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px;justify-content:center;}
+.tc{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(255,255,255,.12);color:rgba(255,255,255,.8);}
+
+/* BOTTOM NAV */
+.bnv{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--bd);padding:11px 16px;display:flex;gap:9px;z-index:100;box-shadow:0 -4px 12px rgba(0,0,0,.08);}
+.btn-bk{flex:1;padding:13px;border:1.5px solid var(--bd);border-radius:10px;background:#fff;font-size:14px;font-weight:700;cursor:pointer;color:var(--tx);font-family:inherit;}
+.btn-nx{flex:2;padding:13px;border:none;border-radius:10px;background:var(--or);font-size:14px;font-weight:800;cursor:pointer;color:#fff;font-family:inherit;box-shadow:0 3px 10px rgba(232,82,26,.35);}
+.btn-bk:disabled{opacity:.3;cursor:default;}
+
+/* AVG BOX */
+.avg-box{background:var(--bll);border-radius:8px;padding:10px 12px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;}
+.avg-l{font-size:12px;color:var(--bl);font-weight:500;}
+.avg-v{font-size:16px;font-weight:800;color:var(--bl);}
+
+/* DEDUCTION ITEM */
+.ded-item{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.ded-name{font-size:12px;color:var(--mu);min-width:120px;}
+.ded-inp{flex:1;height:36px;border:1.5px solid var(--bd);border-radius:7px;padding:0 10px 0 22px;font-size:13px;background:#fff;font-family:inherit;}
+.ded-inp:focus{outline:none;border-color:var(--or);}
+
+/* CIRCULAR REF */
+.circ-ref{background:#F8F9FA;border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:10px;}
+.circ-title{font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.circ-title svg{opacity:.5;}
+.circ-row{display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--bd);font-size:12px;}
+.circ-row:last-child{border:none;}
+.circ-type{font-weight:700;color:var(--bl);min-width:100px;flex-shrink:0;}
+.circ-rule{color:var(--mu);line-height:1.5;}
+
+/* HIDDEN */
+.hidden{display:none!important;}
+
+/* PRINT */
+@media print{
+  .hdr,.pgw,.bnv,.share-grid,.no-print,.sh{display:none!important;}
+  body{background:#fff;}
+  .cnt{padding:8px;max-width:100%;}
+  .card{box-shadow:none;break-inside:avoid;}
+  .amort-wrap{overflow:visible;}
+  .at{min-width:unset;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-logo">B</div>
+  <div>
+    <div class="hdr-t">BOB Loan Calculator</div>
+    <div class="hdr-s">Baroda Auto · Personal · Home</div>
+  </div>
+  <div class="hdr-rates">
+    <div class="rp"><span class="rp-l">BRLLR</span><span class="rp-v">7.90%</span></div>
+    <div class="rp"><span class="rp-l">6M MCLR</span><span class="rp-v">8.45%</span></div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="pgw">
+  <div class="pgb"><div class="pgf" id="pgf" style="width:7%"></div></div>
+  <div class="pgi">
+    <div class="pgl" id="pgl">Step 1: Applicant Type</div>
+    <div class="pgc" id="pgc">1 / 14</div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="cnt" id="cnt">
+
+<!-- ========== PHASE 1: PERSON DETAILS ========== -->
+
+<!-- STEP 1: APPLICANT TYPE -->
+<div id="s1">
+  <div class="phase-badge phase-person">Phase 1 — Applicant Details</div>
+  <div class="sh">
+    <div class="sh-title">Applicant Type चुनें</div>
+    <div class="sh-desc">पहले व्यक्ति की जानकारी भरेंगे — फिर loan product</div>
+  </div>
+  <div class="app-grid">
+    <button class="app-btn active" id="ab-sal" onclick="setApp('sal',this)">
+      <span class="app-icon">👔</span>
+      <div class="app-name">Salaried / Pensioner</div>
+      <div class="app-sub">नौकरीपेशा, Retired, Pension लेने वाले</div>
+    </button>
+    <button class="app-btn" id="ab-biz" onclick="setApp('biz',this)">
+      <span class="app-icon">🏪</span>
+      <div class="app-name">Business / Self-Employed</div>
+      <div class="app-sub">व्यापारी, Professional, Freelancer</div>
+    </button>
+  </div>
+  <div class="info info-or" style="margin-top:10px;" id="app-note">
+    <strong>Salaried/Pensioner:</strong> अंतिम 3 महीने की Gross Monthly Income (GMI) का औसत लिया जाता है।
+  </div>
+</div>
+
+<!-- STEP 2A: SALARIED — 3 MONTHS SALARY -->
+<div id="s2a" class="hidden">
+  <div class="phase-badge phase-person">Phase 1 — Applicant Details</div>
+  <div class="sh">
+    <div class="sh-title">3 महीने की Gross Salary</div>
+    <div class="sh-desc">System से auto-detect — हर महीने की salary भरें</div>
+  </div>
+  <div class="info info-bl">
+    <strong>Salaried/Pensioner:</strong> अंतिम 3 महीने की Gross Monthly Income (GMI) का औसत लिया जाता है। हर महीने की salary और deductions enter करें — Net Salary automatic calculate होगी।
+  </div>
+  <div id="month-cards"></div>
+  <div class="avg-box" id="avg-gmi-box">
+    <span class="avg-l">Average GMI — Gross (3 माह)</span>
+    <span class="avg-v" id="avg-gmi-val">₹0</span>
+  </div>
+  <div class="avg-box" style="background:var(--grl);margin-top:6px;">
+    <span class="avg-l" style="color:#085041;">Average Net Salary (3 माह)</span>
+    <span class="avg-v" style="color:#085041;" id="avg-net-val">₹0/माह</span>
+  </div>
+</div>
+
+<!-- STEP 3A: SALARIED — INCOME SUMMARY + EXISTING EMIs -->
+<div id="s3a" class="hidden">
+  <div class="phase-badge phase-person">Phase 1 — Applicant Details</div>
+  <div class="sh">
+    <div class="sh-title">Income Summary</div>
+    <div class="sh-desc">3 महीने की salary summary — verify करें</div>
+  </div>
+  <div class="card">
+    <div class="ct"><span class="dot"></span>Salary Summary — 3 Month Average</div>
+    <div id="sal-summary-rows"></div>
+    <div class="avg-box" style="margin-top:6px;">
+      <span class="avg-l">Average Gross Monthly Income (FOIR के लिए)</span>
+      <span class="avg-v" id="sum-avg-gmi">₹0</span>
+    </div>
+    <div class="avg-box" style="background:var(--grl);margin-top:6px;">
+      <span class="avg-l" style="color:#085041;">Average Net Salary (Reference)</span>
+      <span class="avg-v" style="color:#085041;" id="sum-avg-net">₹0</span>
+    </div>
+  </div>
+  <div class="info info-or">
+    <strong>FOIR Calculation:</strong> Gross Monthly Income (GMI) पर होती है — Net salary FOIR में नहीं ली जाती। GMI का average ऊपर दिखाया है।
+  </div>
+</div>
+
+<!-- STEP 2B: BUSINESS — ENTITY TYPE -->
+<div id="s2b" class="hidden">
+  <div class="phase-badge phase-person">Phase 1 — Applicant Details</div>
+  <div class="sh">
+    <div class="sh-title">Business Entity Type</div>
+    <div class="sh-desc">Entity type के अनुसार income calculation अलग-अलग होती है</div>
+  </div>
+  <div class="circ-ref">
+    <div class="circ-title">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      Income Calculation Rules — Entity Type अनुसार
+    </div>
+    <div class="circ-row">
+      <span class="circ-type">Proprietorship</span>
+      <span class="circ-rule">Income as per Personal ITR (in line with ABS of firm) = Annual Income</span>
+    </div>
+    <div class="circ-row">
+      <span class="circ-type">Partnership / LLP</span>
+      <span class="circ-rule">PAT (Profit After Tax) as per ABS = Annual Income. Partner cannot be co-borrower, only guarantor.</span>
+    </div>
+    <div class="circ-row">
+      <span class="circ-type">Pvt Ltd Company</span>
+      <span class="circ-rule">PAT as per ABS = Annual Income. Director cannot be co-borrower, only guarantor.</span>
+    </div>
+    <div class="circ-row">
+      <span class="circ-type">Professional / Farmer</span>
+      <span class="circ-rule">Average GAI as per ITR for last 2 years = Annual Income</span>
+    </div>
+  </div>
+  <div class="field">
+    <div class="fl">Entity / Profession Type</div>
+    <select id="biz-type" onchange="bizTypeChange()">
+      <option value="prop">Proprietorship Firm</option>
+      <option value="partner">Partnership Firm / LLP</option>
+      <option value="pvtltd">Pvt Ltd Company</option>
+      <option value="prof">Self-Employed Professional (Doctor/CA/Architect etc.)</option>
+      <option value="farmer">Farmer / Agriculturist</option>
+      <option value="other">Other Business</option>
+    </select>
+  </div>
+  <div class="info info-am" id="biz-type-note">
+    Proprietorship: Personal ITR income aligned with ABS of firm।
+  </div>
+</div>
+
+<!-- STEP 3B: BUSINESS — INCOME + DEDUCTIONS -->
+<div id="s3b" class="hidden">
+  <div class="phase-badge phase-person">Phase 1 — Applicant Details</div>
+  <div class="sh">
+    <div class="sh-title">Annual Income — 2 साल</div>
+    <div class="sh-desc">Income और deductions enter करें — Net auto-calculate होगा</div>
+  </div>
+  <div class="info info-bl">
+    <strong>Business Income Rule:</strong> अंतिम 2 वित्त वर्षों की Average Annual Income ली जाती है। Income ≥ ₹6L → FOIR 80% | &lt; ₹6L → FOIR 60%
+  </div>
+
+  <!-- Year 1 -->
+  <div class="card" style="margin-bottom:10px;">
+    <div class="ct"><span class="dot"></span><span id="biz-y1-label">FY 2023-24</span> — 2 साल पहले</div>
+    <div class="field">
+      <div class="fl">
+        <span id="fy1-label">Gross Annual Income</span>
+        <span class="fb" id="fy1-type">ITR Income</span>
+      </div>
+      <div class="iw"><span class="pfx">₹</span><input type="number" id="gai-y1" placeholder="जैसे 700000" oninput="calcBizAvg()"></div>
+    </div>
+    <div class="field" style="padding-top:6px;border-top:1px dashed var(--bd);margin-bottom:8px;">
+      <div class="fl"><span>Total Deductions (Tax + Other)</span></div>
+      <div class="iw"><span class="pfx">₹</span><input type="number" id="biz-ded-inp-y1" placeholder="0" oninput="calcBizAvg()" style="height:40px;font-size:14px;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <div class="calc-net" style="background:var(--aml);">
+        <span class="net-label" style="color:#633806;">Total Deductions</span>
+        <span class="net-val" style="color:#633806;" id="biz-ded-y1">₹0</span>
+      </div>
+      <div class="calc-net">
+        <span class="net-label">Net Income Y1</span>
+        <span class="net-val" id="biz-net-y1">₹0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Year 2 -->
+  <div class="card" style="margin-bottom:10px;">
+    <div class="ct"><span class="dot"></span><span id="biz-y2-label">FY 2024-25</span> — पिछला साल</div>
+    <div class="field">
+      <div class="fl">
+        <span id="fy2-label">Gross Annual Income</span>
+        <span class="fb" id="fy2-type">ITR Income</span>
+      </div>
+      <div class="iw"><span class="pfx">₹</span><input type="number" id="gai-y2" placeholder="जैसे 850000" oninput="calcBizAvg()"></div>
+    </div>
+    <div class="field" style="padding-top:6px;border-top:1px dashed var(--bd);margin-bottom:8px;">
+      <div class="fl"><span>Total Deductions (Tax + Other)</span></div>
+      <div class="iw"><span class="pfx">₹</span><input type="number" id="biz-ded-inp-y2" placeholder="0" oninput="calcBizAvg()" style="height:40px;font-size:14px;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <div class="calc-net" style="background:var(--aml);">
+        <span class="net-label" style="color:#633806;">Total Deductions</span>
+        <span class="net-val" style="color:#633806;" id="biz-ded-y2">₹0</span>
+      </div>
+      <div class="calc-net">
+        <span class="net-label">Net Income Y2</span>
+        <span class="net-val" id="biz-net-y2">₹0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Averages -->
+  <div class="avg-box" id="avg-gai-box">
+    <span class="avg-l">Average Gross Annual Income (2 साल)</span>
+    <span class="avg-v" id="avg-gai-val">₹0/साल</span>
+  </div>
+  <div class="avg-box" style="background:var(--grl);margin-top:6px;">
+    <span class="avg-l" style="color:#085041;">Average Net Annual Income (Reference)</span>
+    <span class="avg-v" style="color:#085041;" id="avg-biz-net">₹0/साल</span>
+  </div>
+  <div class="avg-box" style="background:var(--bll);margin-top:6px;">
+    <span class="avg-l" style="color:var(--bl);">Monthly Equivalent (FOIR के लिए)</span>
+    <span class="avg-v" style="color:var(--bl);" id="avg-gai-monthly">₹0/माह</span>
+  </div>
+
+  <!-- Depreciation Add-back -->
+  <div class="card" id="dep-card" style="margin-top:10px;">
+    <div class="ct"><span class="dot"></span>Depreciation Add-back (Optional)</div>
+    <div class="info info-am" style="margin-bottom:10px;">
+      <strong>Depreciation Add-back:</strong> Non-individuals (Partnership, Proprietorship, LLP, Pvt Ltd, Pub Ltd) के लिए allowed।<br>
+      <strong>Conditions:</strong> Add-back ≤ 50% of eligible income | Last 2 yrs audited Balance Sheet | BS not older than 9 months | 15% से ज़्यादा variation → justify करें। Trust / Society eligible नहीं।
+    </div>
+    <div class="salary-row">
+      <div class="mini-field">
+        <div class="mini-label">Depreciation Y1</div>
+        <div class="iw"><span class="pfx">₹</span><input type="number" id="dep-y1" placeholder="0" oninput="calcBizAvg()" style="height:36px;font-size:13px;"></div>
+      </div>
+      <div class="mini-field">
+        <div class="mini-label">Depreciation Y2</div>
+        <div class="iw"><span class="pfx">₹</span><input type="number" id="dep-y2" placeholder="0" oninput="calcBizAvg()" style="height:36px;font-size:13px;"></div>
+      </div>
+    </div>
+    <div class="avg-box" style="background:#EEEDFE;margin-top:8px;">
+      <span class="avg-l" style="color:#3C3489;">Adjusted Income (after Depreciation add-back)</span>
+      <span class="avg-v" style="color:#3C3489;" id="adj-income-val">₹0</span>
+    </div>
+    <div class="info info-or" style="margin-top:8px;font-size:11px;display:none;" id="dep-warning"></div>
+  </div>
+</div>
+
+<!-- STEP 4: EXISTING EMIs (Both) -->
+<div id="s4" class="hidden">
+  <div class="phase-badge phase-person">Phase 1 — Applicant Details</div>
+  <div class="sh">
+    <div class="sh-title">Existing EMIs / Obligations</div>
+    <div class="sh-desc">सभी चल रही EMIs का कुल amount</div>
+  </div>
+  <div class="card">
+    <div class="ct"><span class="dot"></span>Monthly Financial Obligations</div>
+    <div class="info info-am" style="margin-bottom:12px;">
+      <strong>इसमें शामिल करें:</strong> Home Loan EMI + Car Loan EMI + Personal Loan EMI + Two-Wheeler EMI + Credit Card Minimum Due + किसी भी अन्य loan की EMI।
+    </div>
+    <div class="field">
+      <div class="fl">Total All Existing EMIs</div>
+      <div class="iw"><span class="pfx">₹</span><input type="number" id="exist-emi" value="0" placeholder="0"></div>
+    </div>
+    <div id="foir-preview" class="avg-box">
+      <span class="avg-l">Available EMI Capacity</span>
+      <span class="avg-v" id="foir-avail">₹0</span>
+    </div>
+    <div style="font-size:11px;color:var(--mu);margin-top:6px;" id="foir-preview-detail"></div>
+  </div>
+</div>
+
+<!-- STEP 5: CIBIL -->
+<div id="s5" class="hidden">
+  <div class="phase-badge phase-person">Phase 1 — Applicant Details</div>
+  <div class="sh">
+    <div class="sh-title">CIBIL Score</div>
+    <div class="sh-desc">Slider खींचें — Rate of Interest automatically set होगी</div>
+  </div>
+  <div class="card">
+    <div class="cibil-box">
+      <div class="cn" id="cn" style="color:#085041;">750</div>
+      <div class="cl" id="cl">Good — अच्छी rate मिलेगी</div>
+    </div>
+    <input type="range" min="300" max="900" step="5" value="750" id="cibil-sl" oninput="updCibil()">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--mu);margin-bottom:12px;">
+      <span>300</span><span>500</span><span>700</span><span>800</span><span>900</span>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:10px;background:var(--bg);border-radius:8px;">
+      <input type="checkbox" id="neg-cibil" onchange="updCibil()" style="width:18px;height:18px;cursor:pointer;">
+      Score (-1) है — New to Credit (पहले कोई loan/card नहीं)
+    </label>
+  </div>
+</div>
+
+<!-- ========== PHASE 2: PRODUCT SELECTION ========== -->
+
+<!-- STEP 6: PRODUCT -->
+<div id="s6" class="hidden">
+  <div class="phase-badge phase-product">Phase 2 — Product चुनें</div>
+  <div class="sh">
+    <div class="sh-title">Loan Product</div>
+    <div class="sh-desc">कौन सा loan लेना है?</div>
+  </div>
+  <div class="prod-grid">
+    <button class="prod-btn active" id="pb-car" onclick="selProd('car',this)">
+      <div class="pb-name">Car Loan</div>
+      <div class="pb-code">Multiple Schemes</div>
+      <span class="pb-tag tag-std">Auto Loan</span>
+    </button>
+    <button class="prod-btn coming" onclick="comingSoon()">
+      <div class="pb-name">Personal Loan</div>
+      <div class="pb-code">Coming Soon</div>
+      <span class="pb-tag tag-soon">जल्द आएगा</span>
+    </button>
+    <button class="prod-btn coming" onclick="comingSoon()">
+      <div class="pb-name">Home Loan</div>
+      <div class="pb-code">Coming Soon</div>
+      <span class="pb-tag tag-soon">जल्द आएगा</span>
+    </button>
+    <button class="prod-btn coming" onclick="comingSoon()">
+      <div class="pb-name">Two-Wheeler Loan</div>
+      <div class="pb-code">Coming Soon</div>
+      <span class="pb-tag tag-soon">जल्द आएगा</span>
+    </button>
+  </div>
+</div>
+
+<!-- ========== PHASE 3: CAR LOAN SPECIFIC ========== -->
+
+<!-- STEP 7: CAR SCHEME SELECT -->
+<div id="s7" class="hidden">
+  <div class="phase-badge phase-calc">Phase 3 — Car Loan Details</div>
+  <div class="sh">
+    <div class="sh-title">Car Loan Scheme</div>
+    <div class="sh-desc">Applicant के अनुसार scheme चुनें</div>
+  </div>
+  <div class="car-grid">
+    <button class="car-btn active" id="cs-normal" onclick="selScheme('normal',this)">
+      <div class="car-dot"></div>
+      <div class="car-info">
+        <div class="car-name">Baroda Car Loan <span class="pb-tag tag-std">LA590/591</span></div>
+        <div class="car-desc">Standard — All customers | LTV 90%</div>
+      </div>
+    </button>
+    <button class="car-btn" id="cs-yoddha" onclick="selScheme('yoddha',this)">
+      <div class="car-dot"></div>
+      <div class="car-info">
+        <div class="car-name">Baroda Yoddha Auto <span class="pb-tag tag-def">LA275</span></div>
+        <div class="car-desc">Defence only | 701+ पर best rate | Processing NIL</div>
+      </div>
+    </button>
+    <button class="car-btn" id="cs-govt" onclick="selScheme('govt',this)">
+      <div class="car-dot"></div>
+      <div class="car-info">
+        <div class="car-name">Car Loan — Govt/PSU <span class="pb-tag tag-def">LA293</span></div>
+        <div class="car-desc">Govt/PSU employees | 726+ पर best rate</div>
+      </div>
+    </button>
+    <button class="car-btn" id="cs-direct" onclick="selScheme('direct',this)">
+      <div class="car-dot"></div>
+      <div class="car-info">
+        <div class="car-name">Baroda Direct Car Loan <span class="pb-tag tag-new">LA360/361</span></div>
+        <div class="car-desc">Branch/Staff sourced only | Fixed ROI 20bps better</div>
+      </div>
+    </button>
+    <button class="car-btn" id="cs-ev" onclick="selScheme('ev',this)">
+      <div class="car-dot"></div>
+      <div class="car-info">
+        <div class="car-name">bob Green Wheel (EV) <span class="pb-tag tag-ev">LA389/390</span></div>
+        <div class="car-desc">Electric Vehicles ONLY | 15bps better | 96M tenure</div>
+      </div>
+    </button>
+    <button class="car-btn" id="cs-preowned" onclick="selScheme('preowned',this)">
+      <div class="car-dot"></div>
+      <div class="car-info">
+        <div class="car-name">Pre-owned Car Loan <span class="pb-tag tag-used">LA250</span></div>
+        <div class="car-desc">Used car ≤5 yrs | LTV 75% | Max ₹50L | 60M</div>
+      </div>
+    </button>
+  </div>
+  <div class="info info-or" id="scheme-note" style="margin-top:8px;">Baroda Car Loan — Standard scheme for all। LTV 90% on on-road price।</div>
+</div>
+
+<!-- STEP 8: CAR DETAILS -->
+<div id="s8" class="hidden">
+  <div class="phase-badge phase-calc">Phase 3 — Car Loan Details</div>
+  <div class="sh">
+    <div class="sh-title">गाड़ी और लोन की जानकारी</div>
+    <div class="sh-desc">On-road price और loan की details भरें</div>
+  </div>
+  <div class="card">
+    <div class="field">
+      <div class="fl">Car On-Road Price</div>
+      <div class="iw"><span class="pfx">₹</span><input type="number" id="onroad" value="1000000" oninput="updLTV()"></div>
+      <div style="font-size:11px;color:var(--mu);margin-top:4px;">Ex-showroom + Road Tax + RTO + Insurance (accessories नहीं)</div>
+    </div>
+    <div class="avg-box" id="ltv-box">
+      <span class="avg-l">Max Loan (LTV 90%)</span>
+      <span class="avg-v" id="ltv-val">₹9,00,000</span>
+    </div>
+    <div class="field" style="margin-top:12px;">
+      <div class="fl">ROI Type</div>
+      <div class="tg">
+        <button class="tb active" id="rf" onclick="setROI('float')">Floating ROI</button>
+        <button class="tb" id="rx" onclick="setROI('fixed')">Fixed ROI</button>
+      </div>
+    </div>
+    <div class="field">
+      <div class="fl">Loan Tenure</div>
+      <select id="tenure"></select>
+    </div>
+    <div class="field">
+      <div class="fl">Proposed Loan Amount <span style="font-size:10px;font-weight:400;">(खाली = Auto Max Eligibility)</span></div>
+      <div class="iw"><span class="pfx">₹</span><input type="number" id="prop-loan" placeholder="खाली छोड़ें — Max calculate होगा"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== PHASE 4: RESULTS ========== -->
+
+<!-- STEP 9: ROI + ELIGIBILITY -->
+<div id="s9" class="hidden">
+  <div class="phase-badge phase-result">Phase 4 — Results</div>
+  <div class="sh">
+    <div class="sh-title">ROI और Eligibility</div>
+  </div>
+  <div id="s9-c"></div>
+</div>
+
+<!-- STEP 10: FOIR BREAKDOWN -->
+<div id="s10" class="hidden">
+  <div class="phase-badge phase-result">Phase 4 — Results</div>
+  <div class="sh">
+    <div class="sh-title">FOIR Calculation Breakdown</div>
+    <div class="sh-desc">आय से EMI capacity का पूरा हिसाब</div>
+  </div>
+  <div id="s10-c"></div>
+</div>
+
+<!-- STEP 11: EMI COMPARISON -->
+<div id="s11" class="hidden">
+  <div class="phase-badge phase-result">Phase 4 — Results</div>
+  <div class="sh">
+    <div class="sh-title">EMI — Tenure Comparison</div>
+    <div class="sh-desc">अलग-अलग tenure पर monthly EMI</div>
+  </div>
+  <div id="s11-c"></div>
+</div>
+
+<!-- STEP 12: TOTAL COST + YEAR AMORT -->
+<div id="s12" class="hidden">
+  <div class="phase-badge phase-result">Phase 4 — Results</div>
+  <div class="sh">
+    <div class="sh-title">Total Cost Summary</div>
+    <div class="sh-desc">लोन की पूरी लागत और साल-वार breakdown</div>
+  </div>
+  <div id="s12-c"></div>
+</div>
+
+<!-- STEP 13: MONTHLY AMORTIZATION -->
+<div id="s13" class="hidden">
+  <div class="phase-badge phase-result">Phase 4 — Results</div>
+  <div class="sh">
+    <div class="sh-title">Monthly Amortization Schedule</div>
+    <div class="sh-desc">हर महीने का Principal और Interest</div>
+  </div>
+  <div id="s13-c"></div>
+</div>
+
+<!-- STEP 14: SHARE -->
+<div id="s14" class="hidden">
+  <div class="phase-badge phase-result">Phase 4 — Share</div>
+  <div class="sh">
+    <div class="sh-title">Results Share करें</div>
+  </div>
+  <div id="share-hero"></div>
+  <div class="share-grid">
+    <button class="sbtn s-pdf" onclick="doPrint()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      PDF Download / Print
+    </button>
+    <button class="sbtn s-wa" onclick="doWA()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+      WhatsApp पर Share करें
+    </button>
+  </div>
+</div>
+
+</div><!-- end cnt -->
+
+<!-- BOTTOM NAV -->
+<div class="bnv no-print">
+  <button class="btn-bk" id="btn-bk" onclick="goBack()" disabled>← वापस</button>
+  <button class="btn-nx" id="btn-nx" onclick="goNext()">आगे →</button>
+</div>
+
+<script>
+// ===== CONSTANTS =====
+const BRLLR=7.90,SP=0.25,MCLR6M=8.45,MCLR1Y=8.70;
+let cur=1,appType='sal',prodType='car',scheme='normal',roiType='float';
+let calcR={};
+
+// ===== 3 MONTHS AUTO DETECT =====
+function getLastThreeMonths(){
+  const now=new Date();
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const hindiMonths=['जनवरी','फरवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'];
+  const res=[];
+  for(let i=2;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    res.push({
+      month:months[d.getMonth()],
+      hindi:hindiMonths[d.getMonth()],
+      year:d.getFullYear(),
+      key:'m'+i,
+      isCurrent:i===0
+    });
+  }
+  return res;
+}
+
+function buildMonthCards(){
+  const months=getLastThreeMonths();
+  let html='';
+  months.forEach((m,idx)=>{
+    html+=`<div class="month-card" id="mc-${m.key}">
+      <div class="month-name">
+        ${m.hindi} ${m.year}
+        <span class="month-badge ${m.isCurrent?'mb-cur':'mb-prev'}">${m.isCurrent?'Current':'Previous'}</span>
+      </div>
+
+      <div class="field" style="margin-bottom:8px;">
+        <div class="mini-label" style="font-size:11.5px;font-weight:600;color:var(--tx);margin-bottom:5px;">Gross Salary</div>
+        <div class="iw"><span class="pfx">₹</span>
+        <input type="number" id="gs-${m.key}" placeholder="जैसे 45000" oninput="calcSalAvg()" style="height:40px;font-size:14px;font-weight:600;"></div>
+      </div>
+
+      <div class="field" style="margin-bottom:8px;padding-top:6px;border-top:1px dashed var(--bd);">
+        <div class="mini-label" style="font-size:11.5px;font-weight:600;color:var(--mu);margin-bottom:5px;">Total Deductions (TDS+PF+PT+Other)</div>
+        <div class="iw"><span class="pfx">₹</span>
+        <input type="number" id="ded-total-inp-${m.key}" placeholder="0" oninput="calcSalAvg()" style="height:40px;font-size:14px;"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div class="calc-net" style="background:var(--aml);">
+          <span class="net-label" style="color:#633806;">Total Deductions</span>
+          <span class="net-val" style="color:#633806;" id="ded-total-${m.key}">₹0</span>
+        </div>
+        <div class="calc-net">
+          <span class="net-label">Net Salary</span>
+          <span class="net-val" id="net-sal-${m.key}">₹0</span>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('month-cards').innerHTML=html;
+}
+
+function buildDedCards(){
+  // Deductions are now inline in buildMonthCards() — this function is no longer needed
+}
+
+function calcSalAvg(){
+  const months=getLastThreeMonths();
+  let grossTotal=0, netTotal=0;
+  months.forEach(m=>{
+    const gs=parseFloat(document.getElementById('gs-'+m.key)?.value)||0;
+    const mDed=parseFloat(document.getElementById('ded-total-inp-'+m.key)?.value)||0;
+    const net=Math.max(0,gs-mDed);
+    grossTotal+=gs; netTotal+=net;
+    const dedEl=document.getElementById('ded-total-'+m.key);
+    const netEl=document.getElementById('net-sal-'+m.key);
+    if(dedEl) dedEl.textContent='₹'+Math.round(mDed).toLocaleString('en-IN');
+    if(netEl) netEl.textContent='₹'+Math.round(net).toLocaleString('en-IN');
+    const mc=document.getElementById('mc-'+m.key);
+    if(mc) mc.classList.toggle('filled',gs>0);
+  });
+  const avgGross=grossTotal/3;
+  const avgNet=netTotal/3;
+  document.getElementById('avg-gmi-val').textContent='₹'+Math.round(avgGross).toLocaleString('en-IN');
+  const netBox=document.getElementById('avg-net-val');
+  if(netBox) netBox.textContent='₹'+Math.round(avgNet).toLocaleString('en-IN')+'/माह';
+  updFOIRPreview();
+}
+
+function buildSalSummary(){
+  const months=getLastThreeMonths();
+  let grossTotal=0,netTotal=0;
+  let rows='';
+  months.forEach(m=>{
+    const gs=parseFloat(document.getElementById('gs-'+m.key)?.value)||0;
+    const mDed=parseFloat(document.getElementById('ded-total-inp-'+m.key)?.value)||0;
+    const net=Math.max(0,gs-mDed);
+    grossTotal+=gs; netTotal+=net;
+    rows+=`<div class="bk-r">
+      <span class="bk-l">${m.hindi} ${m.year}</span>
+      <span style="font-size:12px;color:var(--mu);">Gross: <strong>₹${Math.round(gs).toLocaleString('en-IN')}</strong> | Ded: ₹${Math.round(mDed).toLocaleString('en-IN')} | Net: <strong style="color:#085041;">₹${Math.round(net).toLocaleString('en-IN')}</strong></span>
+    </div>`;
+  });
+  const container=document.getElementById('sal-summary-rows');
+  if(container) container.innerHTML=rows;
+  const avg=grossTotal/3, avgNet=netTotal/3;
+  const avgEl=document.getElementById('sum-avg-gmi');
+  const netEl=document.getElementById('sum-avg-net');
+  if(avgEl) avgEl.textContent='₹'+Math.round(avg).toLocaleString('en-IN')+'/माह';
+  if(netEl) netEl.textContent='₹'+Math.round(avgNet).toLocaleString('en-IN')+'/माह';
+}
+
+function calcDedTotals(){
+  // Now handled inline in calcSalAvg — this is kept for compatibility
+  calcSalAvg();
+}
+
+function getAvgGMI(){
+  const months=getLastThreeMonths();
+  let total=0;
+  months.forEach(m=>{
+    total+=parseFloat(document.getElementById('gs-'+m.key)?.value)||0;
+  });
+  return total/3;
+}
+
+// ===== BUSINESS INCOME =====
+const BIZ_NOTES={
+  prop:'Proprietorship: Personal ITR income (in line with ABS of firm) = Annual Income। Partner/Director नहीं — खुद Proprietor apply कर सकता है।',
+  partner:'Partnership/LLP: PAT (Profit After Tax) as per Audited Balance Sheet = Annual Income। Partner co-borrower नहीं हो सकता — Guarantor बनेगा।',
+  pvtltd:'Pvt Ltd Company: PAT as per ABS = Annual Income। Director co-borrower नहीं — Guarantor। Depreciation add-back allowed।',
+  prof:'Self-Employed Professional: Average GAI as per ITR for last 2 years। Doctor, CA, Architect, CS, Engineer, Interior Designer etc.',
+  farmer:'Agriculturist/Farmer: Average GAI as per last 2 years Revenue Authority certificate या ITR।',
+  other:'Others: Average GAI as per ITR for last 2 years। Deductions to be considered from last year annual income।'
+};
+
+function bizTypeChange(){
+  const bizEl=document.getElementById('biz-type');
+  if(!bizEl) return;
+  const t=bizEl.value;
+  const noteEl=document.getElementById('biz-type-note');
+  if(noteEl) noteEl.textContent=BIZ_NOTES[t]||'';
+  const depCard=document.getElementById('dep-card');
+  if(depCard){
+    const showDep=['prop','partner','pvtltd'].includes(t);
+    depCard.style.display=showDep?'block':'none';
+  }
+  const y1t=document.getElementById('fy1-type');
+  const y2t=document.getElementById('fy2-type');
+  if(y1t&&y2t){
+    if(t==='partner'||t==='pvtltd'){
+      y1t.textContent='PAT (ABS)';y2t.textContent='PAT (ABS)';
+    } else if(t==='prop'){
+      y1t.textContent='ITR Income';y2t.textContent='ITR Income';
+    } else {
+      y1t.textContent='GAI (ITR)';y2t.textContent='GAI (ITR)';
+    }
+  }
+  calcBizAvg();
+}
+
+function calcBizAvg(){
+  const y1=parseFloat(document.getElementById('gai-y1')?.value)||0;
+  const y2=parseFloat(document.getElementById('gai-y2')?.value)||0;
+  const ded1=parseFloat(document.getElementById('biz-ded-inp-y1')?.value)||0;
+  const ded2=parseFloat(document.getElementById('biz-ded-inp-y2')?.value)||0;
+  const net1=Math.max(0,y1-ded1), net2=Math.max(0,y2-ded2);
+
+  // Update per-year display
+  const d1El=document.getElementById('biz-ded-y1'),n1El=document.getElementById('biz-net-y1');
+  const d2El=document.getElementById('biz-ded-y2'),n2El=document.getElementById('biz-net-y2');
+  if(d1El) d1El.textContent='₹'+Math.round(ded1).toLocaleString('en-IN');
+  if(n1El) n1El.textContent='₹'+Math.round(net1).toLocaleString('en-IN');
+  if(d2El) d2El.textContent='₹'+Math.round(ded2).toLocaleString('en-IN');
+  if(n2El) n2El.textContent='₹'+Math.round(net2).toLocaleString('en-IN');
+
+  const avgGross=(y1+y2)/2;
+  const avgNet=(net1+net2)/2;
+  const monthly=avgGross/12;
+
+  const gaiEl=document.getElementById('avg-gai-val');
+  const netBizEl=document.getElementById('avg-biz-net');
+  const monthEl=document.getElementById('avg-gai-monthly');
+  if(gaiEl) gaiEl.textContent='₹'+Math.round(avgGross).toLocaleString('en-IN')+'/साल';
+  if(netBizEl) netBizEl.textContent='₹'+Math.round(avgNet).toLocaleString('en-IN')+'/साल';
+  if(monthEl) monthEl.textContent='₹'+Math.round(monthly).toLocaleString('en-IN')+'/माह';
+
+  // Depreciation add-back
+  const d1=parseFloat(document.getElementById('dep-y1')?.value)||0;
+  const d2=parseFloat(document.getElementById('dep-y2')?.value)||0;
+  if(d1>0||d2>0){
+    const avgDep=Math.min((d1+d2)/2,d2);
+    const maxDep=avgGross*0.5;
+    const actualDep=Math.min(avgDep,maxDep);
+    const adjEl=document.getElementById('adj-income-val');
+    if(adjEl) adjEl.textContent='₹'+Math.round(avgGross+actualDep).toLocaleString('en-IN')+'/साल';
+    const warn=document.getElementById('dep-warning');
+    if(warn){
+      const variation=d1>0?Math.abs(d2-d1)/d1*100:0;
+      let warnMsg='';
+      if(variation>15) warnMsg='⚠️ Depreciation में '+Math.round(variation)+'% variation — justify करें।';
+      if(avgDep>maxDep) warnMsg+=(warnMsg?' | ':'')+`⚠️ Add-back limited to 50% = ₹${Math.round(maxDep).toLocaleString('en-IN')}`;
+      warn.style.display=warnMsg?'block':'none';
+      warn.textContent=warnMsg;
+    }
+  } else {
+    const adjEl=document.getElementById('adj-income-val');
+    if(adjEl) adjEl.textContent='₹'+Math.round(avgGross).toLocaleString('en-IN')+'/साल';
+  }
+  updFOIRPreview();
+}
+
+function getMonthlyIncome(){
+  if(appType==='sal'){
+    return getAvgGMI();
+  } else {
+    const y1=parseFloat(document.getElementById('gai-y1')?.value)||0;
+    const y2=parseFloat(document.getElementById('gai-y2')?.value)||0;
+    const avg=(y1+y2)/2;
+    // Check depreciation add-back
+    const bizT=document.getElementById('biz-type')?.value||'other';
+    if(['prop','partner','pvtltd'].includes(bizT)){
+      const d1=parseFloat(document.getElementById('dep-y1')?.value)||0;
+      const d2=parseFloat(document.getElementById('dep-y2')?.value)||0;
+      if(d1>0||d2>0){
+        const avgDep=Math.min((d1+d2)/2,d2);
+        const maxDep=avg*0.5;
+        const actualDep=Math.min(avgDep,maxDep);
+        return (avg+actualDep)/12;
+      }
+    }
+    return avg/12;
+  }
+}
+
+function getFOIR(mi){
+  if(appType==='sal'){
+    if(mi<50000) return{p:.60,l:'GMI<₹50K → 60%'};
+    if(mi<=150000) return{p:.70,l:'GMI ₹50K−₹1.5L → 70%'};
+    return{p:.80,l:'GMI>₹1.5L → 80%'};
+  } else {
+    const ann=mi*12;
+    return ann<600000?{p:.60,l:'GAI<₹6L → 60%'}:{p:.80,l:'GAI≥₹6L → 80%'};
+  }
+}
+
+function updFOIRPreview(){
+  const mi=getMonthlyIncome();
+  const f=getFOIR(mi);
+  const existEMI=parseFloat(document.getElementById('exist-emi')?.value)||0;
+  const avail=Math.max(0,mi*f.p-existEMI);
+  const el=document.getElementById('foir-avail');
+  if(el) el.textContent='₹'+Math.round(avail).toLocaleString('en-IN')+'/माह';
+  const dl=document.getElementById('foir-preview-detail');
+  if(dl) dl.textContent='FOIR: '+f.l+' | Max EMI: ₹'+Math.round(mi*f.p).toLocaleString('en-IN')+' | Existing: ₹'+existEMI.toLocaleString('en-IN');
+}
+
+// ===== CIBIL =====
+function updCibil(){
+  const v=parseInt(document.getElementById('cibil-sl').value);
+  const neg=document.getElementById('neg-cibil').checked;
+  let lbl='',col='#A32D2D';
+  if(neg){lbl='New to Credit — History नहीं';col='#185FA5';}
+  else if(v>=800){lbl='Excellent — Best Rate';col='#085041';}
+  else if(v>=771){lbl='Very Good — Best Rate';col='#085041';}
+  else if(v>=726){lbl='Good — अच्छी rate';col='#1D9E75';}
+  else if(v>=701){lbl='Average — Standard Rate';col='#BA7517';}
+  else if(v>=681){lbl='Below Avg — High Rate';col='#D85A30';}
+  else if(v>=650){lbl='Poor — Deviation Required';col='#A32D2D';}
+  else{lbl='Very Poor — High Risk';col='#7F0000';}
+  document.getElementById('cn').textContent=neg?'(-1)':v;
+  document.getElementById('cn').style.color=col;
+  document.getElementById('cl').textContent=lbl;
+}
+
+// ===== PRODUCT / SCHEME =====
+function selProd(p,btn){
+  prodType=p;
+  document.querySelectorAll('.prod-btn:not(.coming)').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+
+function comingSoon(){alert('यह product जल्द आएगा! अभी Car Loan calculate करें।');}
+
+function selScheme(s,btn){
+  scheme=s;
+  document.querySelectorAll('.car-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const notes={
+    normal:'Baroda Car Loan — Standard। On-road price का 90% LTV। CMR 7+ no loan।',
+    yoddha:'Baroda Yoddha — Defence only। 701+ पर BRLLR-0.30% = 7.60%। Processing NIL।',
+    govt:'Govt/PSU — 726+ पर BRLLR-0.30%। Salary continuity 8M में 6M। Non-DSA → NIL processing।',
+    direct:'Direct Car Loan — Branch/Staff sourced only। Dealer/DSA नहीं। Fixed ROI 20bps better। NIL prepayment (fixed)।',
+    ev:'EV (Green Wheel) — Electric only! Regular से 15bps ROI better। Processing 50% off। Salaried 726+ को 96M tenure।',
+    preowned:'Pre-owned Car — 5 साल तक पुरानी। LTV 75%। Max ₹50L। Max 60M। Takeover not allowed।'
+  };
+  document.getElementById('scheme-note').textContent=notes[s]||'';
+  buildTenureOptions();
+  updLTV();
+}
+
+function setROI(t){
+  roiType=t;
+  document.getElementById('rf').classList.toggle('active',t==='float');
+  document.getElementById('rx').classList.toggle('active',t==='fixed');
+}
+
+function buildTenureOptions(){
+  const prd=SCHEMES[scheme];
+  const sel=document.getElementById('tenure');
+  if(!sel) return;
+  sel.innerHTML='';
+  [12,24,36,48,60,72,84,96].forEach(t=>{
+    if(t<(prd.minT||12)||t>(prd.maxT||84)) return;
+    const o=document.createElement('option');
+    o.value=t;
+    o.text=t+' महीने — '+t/12+' साल'+(t===prd.maxT?' (MAX)':'');
+    if(t===Math.min(84,prd.maxT)) o.selected=true;
+    sel.appendChild(o);
+  });
+}
+
+function updLTV(){
+  const onroad=parseFloat(document.getElementById('onroad')?.value)||0;
+  const prd=SCHEMES[scheme]||{ltv:.90};
+  const maxL=onroad*prd.ltv;
+  const ltv=document.getElementById('ltv-val');
+  const ltvBox=document.getElementById('ltv-box');
+  if(ltv){ltv.textContent='₹'+Math.round(maxL).toLocaleString('en-IN');}
+  if(ltvBox){
+    ltvBox.querySelector('.avg-l').textContent=`Max Loan (LTV ${Math.round(prd.ltv*100)}%)`;
+  }
+}
+
+// ===== SCHEME CONFIGS =====
+const SCHEMES={
+  normal:{name:'Baroda Car Loan',code:'LA590/591',ltv:.90,maxL:30000000,minT:12,maxT:84,
+    proc:l=>l<=1000000?1500*1.18:2000*1.18,roi:roiNormal,cibil:cibilNormal},
+  yoddha:{name:'Baroda Yoddha Auto Loan',code:'LA275',ltv:.90,maxL:30000000,minT:12,maxT:84,
+    proc:()=>0,roi:roiYoddha,cibil:cibilYoddha},
+  govt:{name:'Car Loan — Govt/PSU',code:'LA293',ltv:.90,maxL:30000000,minT:12,maxT:84,
+    proc:()=>500*1.18,roi:roiGovt,cibil:cibilNormal},
+  direct:{name:'Baroda Direct Car Loan',code:'LA360/361',ltv:.90,maxL:30000000,minT:37,maxT:84,
+    proc:()=>1000*1.18,roi:roiDirect,cibil:cibilNormal},
+  ev:{name:'bob Green Wheel (EV)',code:'LA389/390',ltv:.90,maxL:30000000,minT:12,maxT:96,
+    proc:l=>Math.round((l<=1000000?1500:2000)*.5*1.18),roi:roiEV,cibil:cibilNormal},
+  preowned:{name:'Pre-owned Car Loan',code:'LA250',ltv:.75,maxL:5000000,minT:12,maxT:60,
+    proc:l=>Math.min(Math.max(l*.005*1.18,2500*1.18),10000*1.18),roi:roiPreowned,cibil:cibilPreowned}
+};
+
+// ROI functions
+function roiNormal(c,neg,gmi,rt){
+  if(rt==='float'){
+    if(neg) return gmi>=40000?{r:BRLLR+SP+.05,f:'BRLLR+SP+0.05%',b:'(-1) GMI≥₹40K'}:{r:BRLLR+SP+.60,f:'BRLLR+SP+0.60%',b:'(-1) GMI<₹40K'};
+    if(c>=771) return{r:BRLLR-.30,f:'BRLLR−0.30%',b:'771+'};
+    if(c>=751) return{r:BRLLR-.25,f:'BRLLR−0.25%',b:'751−770'};
+    if(c>=726) return{r:BRLLR+.10,f:'BRLLR+0.10%',b:'726−750'};
+    if(c>=701) return{r:BRLLR+SP+.50,f:'BRLLR+SP+0.50%',b:'701−725'};
+    if(c>=681) return{r:BRLLR+SP+1.85,f:'BRLLR+SP+1.85%',b:'681−700'};
+    return{r:BRLLR+SP+3.15,f:'BRLLR+SP+3.15%',b:'<681'};
+  } else {
+    if(neg) return gmi>=40000?{r:MCLR6M+.15,f:'6M MCLR+0.15%',b:'(-1)'}:{r:MCLR6M+.60,f:'6M MCLR+0.60%',b:'(-1)'};
+    if(c>=771) return{r:MCLR6M,f:'6M MCLR',b:'771+'};
+    if(c>=751) return{r:MCLR6M+.15,f:'6M MCLR+0.15%',b:'751−770'};
+    if(c>=726) return{r:MCLR6M+.35,f:'6M MCLR+0.35%',b:'726−750'};
+    if(c>=701) return{r:MCLR6M+.85,f:'6M MCLR+0.85%',b:'701−725'};
+    if(c>=681) return{r:MCLR6M+1.75,f:'6M MCLR+1.75%',b:'681−700'};
+    return{r:MCLR6M+2.70,f:'6M MCLR+2.70%',b:'<681'};
+  }
+}
+function roiYoddha(c,neg,gmi,rt){
+  if(rt==='float'){
+    if(neg) return{r:BRLLR-.20,f:'BRLLR−0.20%',b:'(-1)'};
+    if(c>=701) return{r:BRLLR-.30,f:'BRLLR−0.30%',b:'701+ ⭐'};
+    if(c>=681) return{r:BRLLR+SP+1.70,f:'BRLLR+SP+1.70%',b:'681−700'};
+    return{r:BRLLR+SP+3.05,f:'BRLLR+SP+3.05%',b:'<681'};
+  } else {
+    if(neg) return{r:MCLR6M+.15,f:'6M MCLR+0.15%',b:'(-1)'};
+    if(c>=771) return{r:MCLR6M,f:'6M MCLR',b:'771+'};
+    if(c>=701) return{r:MCLR6M+.15,f:'6M MCLR+0.15%',b:'701−770'};
+    if(c>=681) return{r:MCLR6M+1.75,f:'6M MCLR+1.75%',b:'681−700'};
+    return{r:MCLR6M+2.70,f:'6M MCLR+2.70%',b:'<681'};
+  }
+}
+function roiGovt(c,neg,gmi,rt){
+  if(rt==='float'){
+    if(neg) return gmi>=40000?{r:BRLLR-.20,f:'BRLLR−0.20%',b:'(-1)≥40K'}:{r:BRLLR+.15,f:'BRLLR+0.15%',b:'(-1)<40K'};
+    if(c>=726) return{r:BRLLR-.30,f:'BRLLR−0.30%',b:'726+ ⭐'};
+    if(c>=701) return{r:BRLLR+SP+.10,f:'BRLLR+SP+0.10%',b:'701−725'};
+    return{r:BRLLR+SP+1.85,f:'BRLLR+SP+1.85%',b:'<701'};
+  } else {
+    if(neg) return{r:MCLR6M+.15,f:'6M MCLR+0.15%',b:'(-1)'};
+    if(c>=771) return{r:MCLR6M,f:'6M MCLR',b:'771+'};
+    if(c>=726) return{r:MCLR6M+.15,f:'6M MCLR+0.15%',b:'726−770'};
+    if(c>=701) return{r:MCLR6M+.35,f:'6M MCLR+0.35%',b:'701−725'};
+    return{r:MCLR6M+1.75,f:'6M MCLR+1.75%',b:'<701'};
+  }
+}
+function roiDirect(c,neg,gmi,rt){
+  if(rt==='float') return roiNormal(c,neg,gmi,'float');
+  if(neg) return{r:MCLR6M+.15,f:'6M MCLR+0.15%',b:'(-1)'};
+  if(c>=771) return{r:MCLR6M,f:'6M MCLR',b:'771+'};
+  if(c>=751) return{r:MCLR6M,f:'6M MCLR (20bps better!)',b:'751−770'};
+  if(c>=726) return{r:MCLR6M+.15,f:'6M MCLR+0.15% (20bps better)',b:'726−750'};
+  if(c>=701) return{r:MCLR6M+.75,f:'6M MCLR+0.75% (20bps better)',b:'701−725'};
+  if(c>=681) return{r:MCLR6M+1.75,f:'6M MCLR+1.75%',b:'681−700'};
+  return{r:MCLR6M+2.70,f:'6M MCLR+2.70%',b:'<681'};
+}
+function roiEV(c,neg,gmi,rt){
+  const base=roiNormal(c,neg,gmi,rt);
+  const floor=rt==='float'?BRLLR-.30:MCLR6M;
+  return{r:Math.max(base.r-.15,floor),f:base.f+' −15bps(EV)',b:base.b};
+}
+function roiPreowned(c,neg,gmi,rt){
+  if(rt==='float'){
+    if(neg) return{r:BRLLR+SP+3.10,f:'BRLLR+SP+3.10%',b:'(-1)'};
+    if(c>=800) return{r:BRLLR+SP+2.50,f:'BRLLR+SP+2.50%',b:'800+'};
+    if(c>=771) return{r:BRLLR+SP+2.85,f:'BRLLR+SP+2.85%',b:'771−799'};
+    if(c>=726) return{r:BRLLR+SP+3.10,f:'BRLLR+SP+3.10%',b:'726−770'};
+    if(c>=701) return{r:BRLLR+SP+3.75,f:'BRLLR+SP+3.75%',b:'701−725'};
+    return{r:BRLLR+SP+5.25,f:'BRLLR+SP+5.25%',b:'≤700'};
+  } else {
+    if(neg) return{r:MCLR1Y+SP+3.50,f:'1Y MCLR+SP+3.50%',b:'(-1)'};
+    if(c>=800) return{r:MCLR1Y+SP+2.90,f:'1Y MCLR+SP+2.90%',b:'800+'};
+    if(c>=771) return{r:MCLR1Y+SP+3.25,f:'1Y MCLR+SP+3.25%',b:'771−799'};
+    if(c>=726) return{r:MCLR1Y+SP+3.50,f:'1Y MCLR+SP+3.50%',b:'726−770'};
+    if(c>=701) return{r:MCLR1Y+SP+4.15,f:'1Y MCLR+SP+4.15%',b:'701−725'};
+    return{r:MCLR1Y+SP+5.65,f:'1Y MCLR+SP+5.65%',b:'<701'};
+  }
+}
+function cibilNormal(c,neg){
+  if(neg) return{ok:true,msg:'✅ No Deviation — (-1) allowed'};
+  if(c>=701) return{ok:true,msg:'✅ Eligible — No deviation'};
+  if(c>=650) return{ok:'warn',msg:'⚠️ RMCC Deviation required'};
+  return{ok:false,msg:'❌ ZOCC Deviation required (<650)'};
+}
+function cibilYoddha(c,neg){
+  if(neg) return{ok:true,msg:'✅ No Deviation'};
+  if(c>=701) return{ok:true,msg:'✅ Eligible'};
+  return{ok:false,msg:'❌ ZOCC Deviation (<701)'};
+}
+function cibilPreowned(c,neg){
+  if(neg) return{ok:'warn',msg:'⚠️ Pre-owned में Deviation required'};
+  if(c>=701) return{ok:true,msg:'✅ Eligible'};
+  if(c>=650) return{ok:'warn',msg:'⚠️ ZOCC Deviation'};
+  return{ok:false,msg:'❌ Not eligible (<650)'};
+}
+
+// ===== HELPERS =====
+function fmt(n){return'₹'+Math.round(n).toLocaleString('en-IN');}
+function fmtL(n){if(n>=10000000)return(n/10000000).toFixed(2)+' Cr';if(n>=100000)return(n/100000).toFixed(2)+' L';return fmt(n);}
+function pct(n){return n.toFixed(2)+'%';}
+function calcEMI(p,r,n){const mr=r/100/12;if(mr===0)return p/n;return p*mr*Math.pow(1+mr,n)/(Math.pow(1+mr,n)-1);}
+function maxFromEMI(e,r,n){const mr=r/100/12;if(mr===0)return e*n;return e*(Math.pow(1+mr,n)-1)/(mr*Math.pow(1+mr,n));}
+
+// ===== MAIN CALCULATE =====
+function calculate(){
+  const prd=SCHEMES[scheme];
+  const cibil=parseInt(document.getElementById('cibil-sl').value);
+  const neg=document.getElementById('neg-cibil').checked;
+  const tenure=parseInt(document.getElementById('tenure').value);
+  const onroad=parseFloat(document.getElementById('onroad').value)||0;
+  const existEMI=parseFloat(document.getElementById('exist-emi').value)||0;
+  const propLoan=parseFloat(document.getElementById('prop-loan').value)||0;
+  const mi=getMonthlyIncome();
+  const foirD=getFOIR(mi);
+  const maxTotalEMI=mi*foirD.p;
+  const avEMI=Math.max(0,maxTotalEMI-existEMI);
+  const roiD=prd.roi(cibil,neg,mi,roiType);
+  const roi=roiD.r;
+  const maxByLTV=Math.min(prd.maxL,onroad*prd.ltv);
+  const maxByFOIR=maxFromEMI(avEMI,roi,tenure);
+  const maxLoan=Math.floor(Math.min(maxByFOIR,maxByLTV)/1000)*1000;
+  const loanUsed=propLoan>0?propLoan:maxLoan;
+  const emi=loanUsed>0?calcEMI(loanUsed,roi,tenure):0;
+  const proc=prd.proc(loanUsed);
+  const cibilSt=prd.cibil(cibil,neg);
+  const totalPay=emi*tenure;
+  const totalInt=totalPay-loanUsed;
+  const proposedEMI=propLoan>0?calcEMI(propLoan,roi,tenure):emi;
+  const totalDed=existEMI+proposedEMI;
+  const headroom=maxTotalEMI-totalDed;
+
+  // Income labels for display
+  let incomeLabel='';
+  if(appType==='sal'){
+    const months=getLastThreeMonths();
+    const names=months.map(m=>m.hindi+' '+m.year).join(', ');
+    incomeLabel='GMI Average — '+names;
+  } else {
+    const bizT=document.getElementById('biz-type')?.value||'other';
+    incomeLabel='GAI Average (2 साल) — '+{'prop':'Proprietorship','partner':'Partnership/LLP','pvtltd':'Pvt Ltd','prof':'Professional','farmer':'Farmer','other':'Business'}[bizT];
+  }
+
+  calcR={prd,cibil,neg,tenure,onroad,existEMI,propLoan,mi,foirD,maxTotalEMI,avEMI,roiD,roi,maxByLTV,maxByFOIR,maxLoan,loanUsed,emi,proc,cibilSt,totalPay,totalInt,proposedEMI,totalDed,headroom,foirPct:foirD.p,incomeLabel,appType,roiType,scheme};
+  buildAll();
+}
+
+function buildAll(){
+  const R=calcR;
+  // Verdict
+  let vd='';
+  if(R.propLoan>0){
+    if(R.propLoan>R.maxByLTV) vd=`<div class="vd fail">❌ LTV Exceed — Max: ${fmtL(R.maxByLTV)} (On-road का ${Math.round(R.prd.ltv*100)}%)</div>`;
+    else if(R.totalDed>R.maxTotalEMI) vd=`<div class="vd fail">❌ FOIR Exceed — Shortfall: ${fmt(Math.abs(R.headroom))} | Max eligible: ${fmtL(R.maxLoan)}</div>`;
+    else if(!R.cibilSt.ok) vd=`<div class="vd fail">❌ CIBIL — ${R.cibilSt.msg}</div>`;
+    else if(R.cibilSt.ok==='warn') vd=`<div class="vd warn">⚠️ ${fmtL(R.propLoan)} OK — ${R.cibilSt.msg}</div>`;
+    else vd=`<div class="vd pass">✅ Eligible! ${fmtL(R.propLoan)} | EMI: ${fmt(R.proposedEMI)}/माह | Headroom: ${fmt(R.headroom)}</div>`;
+  }
+
+  // S9: ROI + Eligibility
+  document.getElementById('s9-c').innerHTML=`
+    ${vd}
+    <div class="res-hero">
+      <div class="rh-grid">
+        <div><div class="rh-label">Current ROI</div><div class="rh-val">${pct(R.roi)}</div><div class="rh-sub">${R.roiD.f}</div></div>
+        <div><div class="rh-label">Monthly EMI</div><div class="rh-val">${R.loanUsed>0?fmt(R.emi):'—'}</div><div class="rh-sub">on ${fmtL(R.loanUsed)}</div></div>
+      </div>
+      <div class="rh-div"></div>
+      <div class="rh-row"><span class="rh-rl">CIBIL Bracket</span><span class="rh-rv">${R.roiD.b}</span></div>
+      <div class="rh-row"><span class="rh-rl">Processing Charge</span><span class="rh-rv">${R.proc===0?'₹0 (NIL)':fmt(R.proc)}</span></div>
+      <div class="rh-row"><span class="rh-rl">CIBIL Status</span><span class="rh-rv">${R.cibilSt.msg}</span></div>
+      <div class="rh-row"><span class="rh-rl">ROI Type</span><span class="rh-rv">${R.roiType==='float'?'Floating':'Fixed'}</span></div>
+    </div>
+    <div class="eg">
+      <div class="ec ${R.avEMI>0?'ok':'bad'}">
+        <div class="ec-t">FOIR Max EMI</div>
+        <div class="ec-v">${fmt(R.avEMI)}</div>
+        <div class="ec-s">${R.foirD.l}</div>
+      </div>
+      <div class="ec ${R.maxLoan>0?'ok':'bad'}">
+        <div class="ec-t">Max Eligible Loan</div>
+        <div class="ec-v">${R.maxLoan>0?fmtL(R.maxLoan):'₹0'}</div>
+        <div class="ec-s">${R.maxByFOIR<R.maxByLTV?'FOIR limited':'LTV limited'}</div>
+      </div>
+    </div>`;
+
+  // S10: FOIR Breakdown
+  const months=appType==='sal'?getLastThreeMonths():null;
+  let salBreakdown='';
+  if(appType==='sal'&&months){
+    salBreakdown=`<div class="bk-h">3 महीने की Salary Details</div>`;
+    months.forEach(m=>{
+      const gs=parseFloat(document.getElementById('gs-'+m.key)?.value)||0;
+      const ns=parseFloat(document.getElementById('ns-'+m.key)?.value)||0;
+      salBreakdown+=`<div class="bk-r"><span class="bk-l">${m.hindi} ${m.year}</span><span class="bk-v o">${fmt(gs)}/माह</span></div>`;
+    });
+  }
+  document.getElementById('s10-c').innerHTML=`
+    <div class="bk">
+      ${salBreakdown}
+      <div class="bk-h">Income Assessment</div>
+      <div class="bk-r"><span class="bk-l">Applicant Type</span><span class="bk-v">${R.appType==='sal'?'Salaried/Pensioner':'Business/Self-Employed'}</span></div>
+      <div class="bk-r"><span class="bk-l">Monthly Income</span><span class="bk-v o">${fmt(R.mi)}/माह</span></div>
+      <div class="bk-r"><span class="bk-l">FOIR %</span><span class="bk-v o">${Math.round(R.foirPct*100)}% — ${R.foirD.l}</span></div>
+      <div class="bk-r"><span class="bk-l">Max Total EMI Limit</span><span class="bk-v o">${fmt(R.maxTotalEMI)}/माह</span></div>
+      <div class="bk-h">Deductions</div>
+      <div class="bk-r"><span class="bk-l">Existing EMIs</span><span class="bk-v r">${fmt(R.existEMI)}</span></div>
+      <div class="bk-r"><span class="bk-l">Car Loan EMI</span><span class="bk-v r">${fmt(R.emi)}</span></div>
+      <div class="bk-r"><span class="bk-l">Total Deductions</span><span class="bk-v r">${fmt(R.totalDed)}</span></div>
+      <div class="bk-h">Result</div>
+      <div class="bk-r"><span class="bk-l">Headroom</span><span class="bk-v ${R.headroom>=0?'g':'r'}">${R.headroom>=0?fmt(R.headroom)+' ✅':fmt(Math.abs(R.headroom))+' EXCEED ❌'}</span></div>
+      <div class="bk-h">LTV (Loan to Value)</div>
+      <div class="bk-r"><span class="bk-l">On-Road Price</span><span class="bk-v">${fmt(R.onroad)}</span></div>
+      <div class="bk-r"><span class="bk-l">LTV ${Math.round(R.prd.ltv*100)}% — Max Loan</span><span class="bk-v g">${fmtL(R.maxByLTV)}</span></div>
+      <div class="bk-r"><span class="bk-l">Margin (खुद देना)</span><span class="bk-v">${fmt(R.onroad-R.maxByLTV)} (${Math.round((1-R.prd.ltv)*100)}%)</span></div>
+    </div>`;
+
+  // S11: EMI Comparison
+  const colors=['#1D9E75','#378ADD','#BA7517','#D85A30','#A32D2D','#534AB7','#E8521A'];
+  const tens=[12,24,36,48,60,72,84,96].filter(t=>t>=(R.prd.minT||12)&&t<=(R.prd.maxT||84));
+  let bars='';
+  if(R.loanUsed>0){
+    const maxE=calcEMI(R.loanUsed,R.roi,tens[0]);
+    tens.forEach((t,i)=>{
+      const e=calcEMI(R.loanUsed,R.roi,t);
+      const w=Math.min(Math.round((e/maxE)*100),100);
+      bars+=`<div class="ebr"><div class="ebl">${t}M (${t/12}yr)</div>
+        <div class="ebo"><div class="ebi" style="width:${w}%;background:${colors[i%colors.length]};"><span class="ebt">${fmt(e)}</span></div></div></div>`;
+    });
+  }
+  document.getElementById('s11-c').innerHTML=`<div class="card"><div class="ct"><span class="dot"></span>Loan: ${fmtL(R.loanUsed)} @ ${pct(R.roi)}</div>${bars||'<p style="color:var(--mu);font-size:12px;">Loan amount enter करें</p>'}</div>`;
+
+  // S12: Cost + Year Amort
+  const rr=R.roi/100/12;
+  const yrs=Math.ceil(R.tenure/12);
+  let bal=R.loanUsed,yRows='',totP=0,totI=0;
+  for(let y=1;y<=yrs&&R.loanUsed>0;y++){
+    const ms=y===yrs?(R.tenure%12||12):12;
+    let yP=0,yI=0;
+    for(let m=0;m<ms;m++){const ip=bal*rr,pp=R.emi-ip;yI+=ip;yP+=pp;bal=Math.max(0,bal-pp);}
+    totP+=yP;totI+=yI;
+    yRows+=`<tr><td>Year ${y}</td><td>${fmt(yP)}</td><td style="color:#A32D2D">${fmt(yI)}</td><td>${fmt(yP+yI)}</td><td style="color:#085041">${fmt(bal)}</td></tr>`;
+  }
+  document.getElementById('s12-c').innerHTML=`
+    <div class="card">
+      <div class="ct"><span class="dot"></span>Total Cost</div>
+      <div class="bk">
+        <div class="bk-r"><span class="bk-l">Loan Amount</span><span class="bk-v">${fmt(R.loanUsed)}</span></div>
+        <div class="bk-r"><span class="bk-l">ROI (${R.roiType==='float'?'Floating':'Fixed'})</span><span class="bk-v o">${pct(R.roi)}</span></div>
+        <div class="bk-r"><span class="bk-l">EMI / Month</span><span class="bk-v o">${fmt(R.emi)}</span></div>
+        <div class="bk-r"><span class="bk-l">Total Interest</span><span class="bk-v r">${fmt(R.totalInt)}</span></div>
+        <div class="bk-r"><span class="bk-l">Processing Charge</span><span class="bk-v r">${R.proc===0?'₹0 NIL':fmt(R.proc)}</span></div>
+        <div class="bk-r" style="background:#FFF8F5"><span class="bk-l" style="font-weight:700">Total Cost of Loan</span><span class="bk-v r" style="font-size:15px">${fmt(R.totalPay+R.proc)}</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct"><span class="dot"></span>Year-wise Amortization</div>
+      <div class="amort-wrap">
+        <table class="at">
+          <thead><tr><th>Year</th><th>Principal</th><th>Interest</th><th>Total</th><th>Balance</th></tr></thead>
+          <tbody>${yRows}</tbody>
+          <tfoot><tr><td>Total</td><td>${fmt(totP)}</td><td>${fmt(totI)}</td><td>${fmt(totP+totI)}</td><td>₹0</td></tr></tfoot>
+        </table>
+      </div>
+    </div>`;
+
+  // S13: Monthly Amort
+  let mBal=R.loanUsed,mRows='',mP=0,mI=0;
+  for(let m=1;m<=R.tenure&&R.loanUsed>0;m++){
+    const ip=mBal*rr,pp=R.emi-ip;
+    mBal=Math.max(0,mBal-pp);mP+=pp;mI+=ip;
+    mRows+=`<tr><td>${m}</td><td>${fmt(pp)}</td><td>${fmt(ip)}</td><td>${fmt(R.emi)}</td><td>${fmt(mBal)}</td></tr>`;
+  }
+  document.getElementById('s13-c').innerHTML=`
+    <div class="card">
+      <div class="ct"><span class="dot"></span>${fmtL(R.loanUsed)} | ${pct(R.roi)} | EMI: ${fmt(R.emi)}</div>
+      <div class="amort-wrap" style="max-height:55vh;overflow-y:auto;">
+        <table class="at">
+          <thead><tr><th>Month</th><th>Principal</th><th>Interest</th><th>EMI</th><th>Balance</th></tr></thead>
+          <tbody>${mRows}</tbody>
+          <tfoot><tr><td>Total</td><td>${fmt(mP)}</td><td>${fmt(mI)}</td><td>${fmt(R.emi*R.tenure)}</td><td>₹0</td></tr></tfoot>
+        </table>
+      </div>
+    </div>`;
+
+  // S14: Share hero
+  document.getElementById('share-hero').innerHTML=`
+    <div class="sum-h">
+      <div class="sh-lbl">${R.prd.name}</div>
+      <div class="sh-amt">${fmtL(R.loanUsed)}</div>
+      <div class="sh-emi">${fmt(R.emi)}/माह</div>
+      <div class="sh-sub">${R.tenure} months @ ${pct(R.roi)} ${R.roiType==='float'?'Floating':'Fixed'}</div>
+      <div class="tag-row">
+        <span class="tc">CIBIL: ${R.neg?'(-1)':R.cibil}</span>
+        <span class="tc">Processing: ${R.proc===0?'NIL':fmt(R.proc)}</span>
+        <span class="tc">Interest: ${fmtL(R.totalInt)}</span>
+      </div>
+    </div>`;
+}
+
+// ===== APP TYPE =====
+function setApp(t,btn){
+  appType=t;
+  document.querySelectorAll('.app-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const notes={
+    sal:'<strong>Salaried/Pensioner:</strong> अंतिम 3 महीने की Gross Monthly Income (GMI) का औसत लिया जाता है।',
+    biz:'<strong>Business/Self-Employed:</strong> अंतिम 2 साल की GAI का औसत। Entity type के अनुसार income calculation अलग-अलग होती है।'
+  };
+  document.getElementById('app-note').innerHTML=notes[t]||'';
+}
+
+// ===== STEP NAVIGATION =====
+const TOTAL_STEPS=14;
+const STEP_LABELS={
+  1:'Applicant Type',2:'3 Months Salary / Entity Type',3:'Deductions / Income Entry',
+  4:'Existing EMIs',5:'CIBIL Score',6:'Product Selection',
+  7:'Car Loan Scheme',8:'Car Details',9:'ROI & Eligibility',
+  10:'FOIR Breakdown',11:'EMI Comparison',12:'Total Cost',
+  13:'Monthly Schedule',14:'Share Results'
+};
+const PHASES={1:'Phase 1',2:'Phase 1',3:'Phase 1',4:'Phase 1',5:'Phase 1',6:'Phase 2',7:'Phase 3',8:'Phase 3',9:'Phase 4',10:'Phase 4',11:'Phase 4',12:'Phase 4',13:'Phase 4',14:'Phase 4'};
+
+function getSteps(){
+  // Returns ordered step IDs based on appType
+  if(appType==='sal'){
+    return[1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+    // s2=s2a, s3=s3a
+  } else {
+    return[1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+    // s2=s2b, s3=s3b
+  }
+}
+
+function getStepId(n){
+  // Map step number to DOM id
+  const salMap={1:'s1',2:'s2a',3:'s3a',4:'s4',5:'s5',6:'s6',7:'s7',8:'s8',9:'s9',10:'s10',11:'s11',12:'s12',13:'s13',14:'s14'};
+  const bizMap={1:'s1',2:'s2b',3:'s3b',4:'s4',5:'s5',6:'s6',7:'s7',8:'s8',9:'s9',10:'s10',11:'s11',12:'s12',13:'s13',14:'s14'};
+  return appType==='sal'?salMap[n]:bizMap[n];
+}
+
+function showStep(n){
+  // Hide all
+  for(let i=1;i<=14;i++){
+    const ids=appType==='sal'?
+      {1:'s1',2:'s2a',3:'s3a',4:'s4',5:'s5',6:'s6',7:'s7',8:'s8',9:'s9',10:'s10',11:'s11',12:'s12',13:'s13',14:'s14'}:
+      {1:'s1',2:'s2b',3:'s3b',4:'s4',5:'s5',6:'s6',7:'s7',8:'s8',9:'s9',10:'s10',11:'s11',12:'s12',13:'s13',14:'s14'};
+    const el=document.getElementById(ids[i]);
+    if(el) el.classList.add('hidden');
+  }
+  // Show current
+  const sid=getStepId(n);
+  const el=document.getElementById(sid);
+  if(el) el.classList.remove('hidden');
+  cur=n;
+  const pct=Math.round((n/TOTAL_STEPS)*100);
+  document.getElementById('pgf').style.width=pct+'%';
+  document.getElementById('pgl').textContent='Step '+n+': '+STEP_LABELS[n];
+  document.getElementById('pgc').textContent=n+' / '+TOTAL_STEPS;
+  document.getElementById('btn-bk').disabled=n===1;
+  document.getElementById('btn-nx').textContent=n===TOTAL_STEPS?'शुरू से करें ↺':'आगे →';
+  document.getElementById('cnt').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function goNext(){
+  if(cur===TOTAL_STEPS){showStep(1);return;}
+  // Build salary summary when moving from step 2 to step 3 (salaried)
+  if(cur===2 && appType==='sal') buildSalSummary();
+  if(cur===8) calculate();
+  showStep(cur+1);
+}
+function goBack(){if(cur>1)showStep(cur-1);}
+
+// ===== SHARE / PRINT =====
+function doPrint(){window.print();}
+
+function doWA(){
+  const R=calcR;
+  if(!R.loanUsed){alert('पहले Calculate करें!');return;}
+  const months=getLastThreeMonths();
+  let incomeDetail='';
+  if(appType==='sal'){
+    months.forEach(m=>{
+      const gs=parseFloat(document.getElementById('gs-'+m.key)?.value)||0;
+      if(gs>0) incomeDetail+=`\n  • ${m.hindi} ${m.year}: ${fmt(gs)}`;
+    });
+    incomeDetail='\n*Salary (3 माह):*'+incomeDetail+'\n*Average GMI:* '+fmt(R.mi)+'/माह';
+  } else {
+    const y1=parseFloat(document.getElementById('gai-y1')?.value)||0;
+    const y2=parseFloat(document.getElementById('gai-y2')?.value)||0;
+    incomeDetail=`\n*GAI Y1:* ${fmt(y1)} | *GAI Y2:* ${fmt(y2)}\n*Average GAI:* ${fmt((y1+y2)/2)}/साल`;
+  }
+  const msg=`🏦 *BANK OF BARODA — Car Loan Summary*
+━━━━━━━━━━━━━━━━━━━━
+📋 *Product:* ${R.prd.name} (${R.prd.code})
+💰 *Loan Amount:* ${fmtL(R.loanUsed)}
+📅 *Tenure:* ${R.tenure} महीने | *ROI:* ${pct(R.roi)} (${R.roiType==='float'?'Floating':'Fixed'})
+💳 *Monthly EMI:* ${fmt(R.emi)}
+━━━━━━━━━━━━━━━━━━━━
+👤 *Applicant:* ${R.appType==='sal'?'Salaried/Pensioner':'Business/Self-Employed'}${incomeDetail}
+📊 *FOIR (${Math.round(R.foirPct*100)}%):* Max EMI ${fmt(R.maxTotalEMI)}/माह
+🔢 *CIBIL:* ${R.neg?'(-1)':R.cibil} [${R.roiD.b}] — ${R.cibilSt.msg}
+✅ *Max Eligible Loan:* ${fmtL(R.maxLoan)}
+━━━━━━━━━━━━━━━━━━━━
+💹 *Cost Breakdown*
+• Principal: ${fmtL(R.loanUsed)}
+• Total Interest: ${fmtL(R.totalInt)}
+• Processing: ${R.proc===0?'NIL':fmt(R.proc)}
+• *Total Cost: ${fmtL(R.totalPay+R.proc)}*
+━━━━━━━━━━━━━━━━━━━━
+🚗 *On-Road:* ${fmt(R.onroad)} | *Margin:* ${fmt(R.onroad-R.maxByLTV)}
+📌 BRLLR: 7.90% | 6M MCLR: 8.45% | SP: 0.25%
+ℹ️ यह सांकेतिक है। अंतिम स्वीकृति Bank की नीति के अनुसार।`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ===== INIT =====
+(function init(){
+  buildMonthCards();
+  buildTenureOptions();
+  bizTypeChange();
+  updCibil();
+  updLTV();
+  updFOIRPreview();
+  showStep(1);
+  ['s2a','s2b','s3a','s3b','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.add('hidden');
+  });
+})();
+</script>
+</body>
+</html>
