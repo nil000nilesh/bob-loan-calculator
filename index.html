@@ -762,14 +762,14 @@ function getLastThreeMonths(){
   const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const hindiMonths=['जनवरी','फरवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'];
   const res=[];
-  for(let i=2;i>=0;i--){
+  for(let i=3;i>=1;i--){
     const d=new Date(now.getFullYear(),now.getMonth()-i,1);
     res.push({
       month:months[d.getMonth()],
       hindi:hindiMonths[d.getMonth()],
       year:d.getFullYear(),
       key:'m'+i,
-      isCurrent:i===0
+      isCurrent:false
     });
   }
   return res;
